@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
+import useLocalStorage from './useLocalStorage';
 
 const setDocumentTitle = count => {
   document.title = `Counter: ${count}`;
@@ -6,60 +7,43 @@ const setDocumentTitle = count => {
 
 const getStateFromLocalStorage = () => {
   const storage = localStorage.getItem('counterState');
+  console.log(storage);
   if (storage) return JSON.parse(storage);
-  return { count: 0 };
+  return 0;
 }
 
-const setStateFromLocalStorage = state => {
-  localStorage.setItem('counterState', JSON.stringify(state));
-  setDocumentTitle(state.count);
+const setStateFromLocalStorage = count => {
+  localStorage.setItem('counterState', JSON.stringify(count));
 }
 
-class Counter extends Component {
-  state = getStateFromLocalStorage();
+const Counter = ({ max, step }) => {
+  const [ count, setCount ] = useLocalStorage(10, 'count');
 
-  increment() {
-    this.setState((state, props) => ({
-      count: state.count + props.step <= props.max ? state.count + props.step : state.count
-    }), () => {
-      setStateFromLocalStorage(this.state);
-    });
+  const increment = () => {
+    setCount(count => (count + step <= max) ? count + step : count);
   }
 
-  componentDidMount() {
-    setDocumentTitle(this.state.count);
+  const decrement = () => {
+    setCount(count => (count - step >= 0) ? count - step : count);
   }
 
-  decrement() {
-    this.setState((state, props) => ({
-      count: state.count - props.step >= 0 ? state.count - props.step : state.count
-    }), () => {
-      setStateFromLocalStorage(this.state);
-    })
-  }
+  const reset = () => setCount(0);
 
-  reset() {
-    this.setState({
-      count: 0
-    }, () => {
-      setStateFromLocalStorage(this.state);
-    })
-  }
+  useEffect(() => {
+    setDocumentTitle(count);
+  }, [count]);
 
-  render() {
-    const { count } = this.state;
-    return (
-      <div className="Counter">
-        <p className="count">{ count }</p>
-        <section className="controls">
-          <button onClick={this.increment.bind(this)}>Increment</button>
-          <button onClick={this.decrement.bind(this)}>Decrement</button>
-          <button onClick={this.reset.bind(this)}>Reset</button>
-        </section>
-      </div>
-    );
-  }
-}
+  return (
+    <div className="Counter">
+      <p className="count">{count}</p>
+      <section className="controls">
+        <button onClick={increment}>Increment</button>
+        <button onClick={decrement}>Decrement</button>
+        <button onClick={reset}>Reset</button>
+      </section>
+    </div>
+  );
+};
 
 export default Counter;
 
