@@ -56,7 +56,9 @@ const Counter = ({ max, step }) => {
   }, [count]);
 
   useEffect(() => {
-    setTimeout(() => console.log(`Count: ${count}`), 3000);
+    const intId = setInterval(() => console.log(`Count: ${count}`),
+    1000);
+    return () => clearInterval(intId);
   }, [count]);
 
   return (
